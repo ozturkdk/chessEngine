@@ -13,13 +13,27 @@ class Board():
                        ['-', '-', '-', '-', '-', '-', '-', '-'],
                        ['-', '-', '-', '-', '-', '-', '-', '-'],
                        ['-', '-', '-', '-', '-', '-', '-', '-'],
+                       ['B', '-', '-', 'k', '-', '-', '-', '-'],
                        ['-', '-', '-', '-', '-', '-', '-', '-'],
-                       ['-', '-', 'K', 'r', '-', '-', '-', '-'],
-                       ['-', '-', 'P', '-', '-', '-', '-', '-'],
-                       ['-', '-', '-', '-', '-', '-', '-', '-'] ]
+                       ['r', '-', '-', '-', '-', '-', '-', '-'],
+                       ['-', '-', '-', '-', '-', '-', '-', 'K'] ]
+        
         self.whiteToMove = True
 
-def LegalMoves(board, whiteToMove):
+def kingsPosition(board, whiteToMove):
+    king = 'K' if whiteToMove else 'k'
+    for array in board:
+        if king in array:
+            kingSquare = [board.index(array), array.index(king)]
+    return kingSquare
+
+def attackedSquares(moves):
+    attackingMoves = []
+    for m in range(len(moves)):
+        attackingMoves.append(moves[m][1])
+    return attackingMoves
+
+def pieceMoves(board, whiteToMove):
     allMoves = []
     
     if whiteToMove:
@@ -43,17 +57,38 @@ def LegalMoves(board, whiteToMove):
                 allMoves = allMoves + knightMoves(board, capturablePieces, i, j)
             if board[i][j] == ownPieces[5]:
                 allMoves = allMoves + pawnMoves(board, capturablePieces, i, j)
-    print(allMoves)
+    return allMoves
+
+def legalMoves(board, whiteToMove):
+    legalMoves = []
+
+    #Find all whites moves:
+    allMoves = pieceMoves(board, whiteToMove)
+    for move in allMoves:
+        hypotheticalBoard = [x[:] for x in board]
+        #Make a hypothetical white move:
+        updateBoard(hypotheticalBoard, move[0], move[1])
+
+        #Blacks turn. Find all blacks moves:
+        whiteToMove = not whiteToMove
+        hypotheticalMoves = pieceMoves(hypotheticalBoard, whiteToMove)
+        
+        #Whites turn: Check if King is in check.
+        whiteToMove = not whiteToMove
+        kingSquare = kingsPosition(hypotheticalBoard, whiteToMove)
+        attackingMoves = attackedSquares(hypotheticalMoves)
+        if kingSquare not in attackingMoves:
+            legalMoves.append(move)
+
+    print(legalMoves)
+    return legalMoves 
 
 def kingMoves(board, capturablePieces, i, j):
     kingMoves = []
     for k, l in zip([0, 0, 1, -1, 1, 1, -1, -1], [1, -1, 0, 0, 1, -1, 1, -1]):
-            try:
-                if all(x >= 0 for x in [i + k, j + l]):
-                    if board[i + k][j + l] in ['-'] + capturablePieces:
-                        kingMoves.append([[i, j], [i + k, j + l]])
-            except IndexError:
-                break
+        if all(x >= 0 and x <= 7 for x in [i + k, j + l]):
+            if board[i + k][j + l] in ['-'] + capturablePieces:
+                kingMoves.append([[i, j], [i + k, j + l]])
     return kingMoves 
 
 def queenMoves(board, capturablePieces, i, j):
@@ -63,7 +98,7 @@ def queenMoves(board, capturablePieces, i, j):
 def rookMoves(board, capturablePieces, i, j):
     rookMoves = []
     for k, l in zip([0, 0, 1, -1], [1, -1, 0, 0]):
-        for m in range(1, 7):
+        for m in range(1, 8):
             try:
                 if all(x >= 0 for x in [i + (k * m), j + (l * m)]):
                     if board[i + (k * m)][j + (l * m)] == '-':
@@ -80,7 +115,7 @@ def rookMoves(board, capturablePieces, i, j):
 def bishopMoves(board, capturablePieces, i, j):
     bishopMoves = []
     for k, l in zip([1, 1, -1, -1], [1, -1, 1, -1]):
-        for m in range(1, 7):
+        for m in range(1, 8):
             try:
                 if all(x >= 0 for x in [i + (k * m), j + (l * m)]):
                     if board[i + (k * m)][j + (l * m)] == '-':
@@ -131,10 +166,9 @@ def pawnMoves(board, capturablePieces, i, j):
     return pawnMoves
 
 def updateBoard(board, fromSq, toSq):
-    movedPiece = board[chessToArray(fromSq)[1]][chessToArray(fromSq)[0]]
-    
-    board[chessToArray(fromSq)[1]][chessToArray(fromSq)[0]] = '-'
-    board[chessToArray(toSq)[1]][chessToArray(toSq)[0]] = movedPiece
+    movedPiece = board[fromSq[0]][fromSq[1]]
+    board[fromSq[0]][fromSq[1]] = '-'
+    board[toSq[0]][toSq[1]] = movedPiece 
 
 def chessToArray(chessSq): 
 
