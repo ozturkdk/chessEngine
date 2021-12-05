@@ -19,8 +19,7 @@ board = [ ['-', '-', '-', '-', '-', '-', '-', '-'],
           ['r', '-', '-', '-', '-', '-', '-', '-'] ]
 
 whiteToMove = False
-moveFrom = 'a1'
-moveTo = "a2"
 
-newBoard = Board(board, whiteToMove, moveFrom, moveTo)
-newBoard.makeMove(newBoard.board, newBoard.whiteToMove, newBoard.moveFrom, newBoard.moveTo)
+newBoard = Board(board, whiteToMove)
+newBoard.makeMove('a1', 'b1')
+#newBoard.makeMove(newBoard.board, newBoard.whiteToMove, 'h7', 'h8')
