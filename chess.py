@@ -86,18 +86,7 @@ class Board():
         #Find all whites moves:
         allMoves = self.pieceMoves()
         for move in allMoves:
-
-            #Check in current state if white is in check.
-            currentKingSquare = self.kingsPosition()
-
-            self.whiteToMove = not self.whiteToMove
-            currentMoves = self.pieceMoves()
-            currentAttackingMoves = self.attackedSquares(currentMoves)
-            if currentKingSquare in currentAttackingMoves:
-                continue
-
             #Make a hypothetical white move:
-            self.whiteToMove = not self.whiteToMove
             hypotheticalBoard = Board([x[:] for x in self.board], self.whiteToMove)
             hypotheticalBoard.updateBoard(move[0], move[1])
 
@@ -113,32 +102,44 @@ class Board():
             if hypotheticalKingSquare not in hypotheicalAttackingMoves:
                 legalMoves.append(move)
 
-        if self.whiteKingsideCastling and [[7,4],[7,5]] not in legalMoves:
-            try:
-                legalMoves.remove([[7,4],[7,6]])
-            except ValueError:
-                pass
+        legalMoves = self.checkForCastling(legalMoves)
 
-        if self.whiteQueensideCastling and [[7,4],[7,3]] not in legalMoves:
-            try:
-                legalMoves.remove([[7,4],[7,2]])
-            except ValueError:
-                pass
-
-        if self.blackKingsideCastling and [[0,4],[0,5]] not in legalMoves:
-            try:
-                legalMoves.remove([[0,4],[0,6]])
-            except ValueError:
-                pass
-
-        if self.blackQueensideCastling and [[0,4],[0,3]] not in legalMoves:
-            try:
-                legalMoves.remove([[0,4],[0,2]])
-            except ValueError:
-                pass
-            
         return legalMoves 
 
+    def checkForCastling(self, legalMoves):
+        self.whiteToMove = not self.whiteToMove
+        currentAttackingMoves = self.pieceMoves()
+        currentAttackedSquares = self.attackedSquares(currentAttackingMoves)
+        self.whiteToMove = not self.whiteToMove
+
+        if self.whiteToMove:
+            if not self.whiteKingsideCastling or any(x in currentAttackedSquares for x in [[7,4], [7,5]]):
+                try:
+                    legalMoves.remove([[7,4],[7,6]])
+                except ValueError:
+                    pass
+            
+            if not self.whiteQueensideCastling and any(x in currentAttackedSquares for x in [[7,4], [7,3]]):
+                try:
+                    legalMoves.remove([[7,4],[7,2]])
+                except ValueError:
+                    pass
+
+        if not self.whiteToMove:
+            if not self.blackKingsideCastling and any(x in currentAttackedSquares for x in [[0,4], [0,5]]):
+                try:
+                    legalMoves.remove([[0,4],[0,6]])
+                except ValueError:
+                    pass
+
+            if not self.blackQueensideCastling and any(x in currentAttackedSquares for x in [[0,4], [0,3]]):
+                try:
+                    legalMoves.remove([[0,4],[0,2]])
+                except ValueError:
+                    pass
+                
+        return legalMoves
+            
     def kingMoves(self, capturablePieces, i, j):
         kingMoves = []
 
