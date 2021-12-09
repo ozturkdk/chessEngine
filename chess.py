@@ -4,17 +4,11 @@ class Board():
         self.whiteToMove = whiteToMove
         self.history = []
 
-        self.whiteKingsideCastling = True
-        self.whiteQueensideCastling = True
-        self.blackKingsideCastling = True
-        self.blackQueensideCastling = True
-
     def makeMove(self, moveFrom, moveTo):
         allLegalMoves = self.legalMoves()
         newMove = [self.chessToArray(moveFrom), self.chessToArray(moveTo)]
         if newMove in allLegalMoves:
             self.history.append(newMove)
-            self.checkForCastling(newMove)
             self.updateBoard(self.chessToArray(moveFrom), self.chessToArray(moveTo))
             #Print statement
             print('\n'.join(' '.join(map(str,sl)) for sl in self.board))
@@ -28,31 +22,15 @@ class Board():
         for array in self.board:
             if king in array:
                 kingSquare = [self.board.index(array), array.index(king)]
-
         return kingSquare
 
-    def checkForCastling(self, newMove):
-        #Check if white kingside castling is legal:
-        if self.whiteKingsideCastling == True and any(x in [[7,4], [7,7]] for x in [newMove[0], newMove[1]]):
-            self.whiteKingsideCastling = False
-
-        #Check if white queenside castling is legal:
-        if self.whiteQueensideCastling == True and any(x in [[7,4], [7,0]] for x in [newMove[0], newMove[1]]):
-            self.whiteQueensideCastling = False
-
-        #Check if black kingside castling is legal:
-        if self.blackKingsideCastling == True and any(x in [[0,4], [0,7]] for x in [newMove[0], newMove[1]]):
-            self.blackKingsideCastling = False
-
-        #Check if black queenside castling is legal:
-        if self.blackQueensideCastling == True and any(x in [[0,4], [0,0]] for x in [newMove[0], newMove[1]]):
-            self.blackQueensideCastling = False
-
-    def attackedSquares(self, moves):
-        attackingMoves = []
-        for m in range(len(moves)):
-            attackingMoves.append(moves[m][1])
-        return attackingMoves
+    def splitMoves(self, moves):
+        fromArray = []
+        toArray = []
+        for i in range(len(moves)):
+            fromArray = fromArray + [moves[i][0]]
+            toArray = toArray + [moves[i][1]]
+        return fromArray, toArray
 
     def pieceMoves(self):
         allMoves = []
@@ -97,48 +75,49 @@ class Board():
             #Whites turn: Check if King is in check.
             hypotheticalBoard.whiteToMove = not hypotheticalBoard.whiteToMove
             hypotheticalKingSquare = hypotheticalBoard.kingsPosition()
-            hypotheicalAttackingMoves = hypotheticalBoard.attackedSquares(hypotheticalMoves)
+            hypotheicalAttackingMoves = hypotheticalBoard.splitMoves(hypotheticalMoves)[1]
 
             if hypotheticalKingSquare not in hypotheicalAttackingMoves:
                 legalMoves.append(move)
 
-        legalMoves = self.checkForCastling(legalMoves)
+        legalMoves = legalMoves + self.legalCastlingMoves()
 
         return legalMoves 
 
-    def checkForCastling(self, legalMoves):
+    def legalCastlingMoves(self):
+        castlingMoves = []
+
+        fromSquares = self.splitMoves(self.history)[0]
+        toSquares = self.splitMoves(self.history)[1]
+
         self.whiteToMove = not self.whiteToMove
         currentAttackingMoves = self.pieceMoves()
-        currentAttackedSquares = self.attackedSquares(currentAttackingMoves)
+        currentAttackedSquares = self.splitMoves(currentAttackingMoves)[1]
         self.whiteToMove = not self.whiteToMove
 
-        if self.whiteToMove:
-            if not self.whiteKingsideCastling or any(x in currentAttackedSquares for x in [[7,4], [7,5]]):
-                try:
-                    legalMoves.remove([[7,4],[7,6]])
-                except ValueError:
-                    pass
-            
-            if not self.whiteQueensideCastling and any(x in currentAttackedSquares for x in [[7,4], [7,3]]):
-                try:
-                    legalMoves.remove([[7,4],[7,2]])
-                except ValueError:
-                    pass
+        if self.whiteToMove == True:
+            if all(x not in fromSquares + toSquares for x in [[7,4], [7,7]]):
+                if all(x not in currentAttackedSquares for x in [[7,4], [7,5]]):
+                    if all(x in ['-'] for x in [self.board[7][5], self.board[7][6]]):
+                        castlingMoves.append([[7,4],[7,6]])
 
-        if not self.whiteToMove:
-            if not self.blackKingsideCastling and any(x in currentAttackedSquares for x in [[0,4], [0,5]]):
-                try:
-                    legalMoves.remove([[0,4],[0,6]])
-                except ValueError:
-                    pass
+            if all(x not in fromSquares + toSquares for x in [[7,4], [7,0]]):
+                if all(x not in currentAttackedSquares for x in [[7,4], [7,3]]):
+                    if all(x in ['-'] for x in [self.board[7][1], self.board[7][2], self.board[7][3]]):
+                        castlingMoves.append([[7,4],[7,2]])
 
-            if not self.blackQueensideCastling and any(x in currentAttackedSquares for x in [[0,4], [0,3]]):
-                try:
-                    legalMoves.remove([[0,4],[0,2]])
-                except ValueError:
-                    pass
-                
-        return legalMoves
+        if self.whiteToMove == False:
+            if all(x not in fromSquares + toSquares for x in [[0,4], [0,7]]):
+                if all(x not in currentAttackedSquares for x in [[0,4], [0,5]]):
+                    if all(x in ['-'] for x in [self.board[0][5], self.board[0][6]]):
+                        castlingMoves.append([[0,4],[0,6]])
+
+            if all(x not in fromSquares + toSquares for x in [[0,4], [0,0]]):
+                if all(x not in currentAttackedSquares for x in [[0,4], [0,3]]):
+                    if all(x in ['-'] for x in [self.board[0][1], self.board[0][2], self.board[0][3]]):
+                        castlingMoves.append([[0,4],[0,2]])
+
+        return castlingMoves
             
     def kingMoves(self, capturablePieces, i, j):
         kingMoves = []
@@ -148,24 +127,6 @@ class Board():
                 if self.board[i + k][j + l] in ['-'] + capturablePieces:
                     kingMoves.append([[i, j], [i + k, j + l]])
 
-        if self.whiteToMove == True:
-            if self.whiteKingsideCastling == True:
-                if all(x in ['-'] for x in [self.board[7][5], self.board[7][6]]):
-                    kingMoves.append([[7,4],[7,6]])
-
-            if self.whiteKingsideCastling == True:
-                if all(x in ['-'] for x in [self.board[7][1], self.board[7][2], self.board[7][3]]):
-                    kingMoves.append([[7,4],[7,2]])
-
-        if self.whiteToMove == False:
-            if self.blackKingsideCastling == True:
-                if all(x in ['-'] for x in [self.board[0][5], self.board[0][6]]):
-                    kingMoves.append([[0,4],[0,6]])
-
-            if self.blackQueensideCastling == True:
-                if all(x in ['-'] for x in [self.board[0][1], self.board[0][2], self.board[0][3]]):
-                    kingMoves.append([[0,4],[0,2]])
-        
         return kingMoves
 
     def queenMoves(self, capturablePieces, i, j):
