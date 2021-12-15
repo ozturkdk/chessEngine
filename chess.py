@@ -6,6 +6,7 @@ class Board():
 
     def makeMove(self, moveFrom, moveTo):
         allLegalMoves = self.legalMoves()
+        print(allLegalMoves)
         newMove = [self.chessToArray(moveFrom), self.chessToArray(moveTo)]
         if newMove in allLegalMoves:
             self.history.append(newMove)
@@ -99,23 +100,27 @@ class Board():
             if all(x not in fromSquares + toSquares for x in [[7,4], [7,7]]):
                 if all(x not in currentAttackedSquares for x in [[7,4], [7,5]]):
                     if all(x in ['-'] for x in [self.board[7][5], self.board[7][6]]):
-                        castlingMoves.append([[7,4],[7,6]])
+                        if self.board[7][4] == 'K' and self.board[7][7] == 'R':
+                            castlingMoves.append([[7,4],[7,6]])
 
             if all(x not in fromSquares + toSquares for x in [[7,4], [7,0]]):
                 if all(x not in currentAttackedSquares for x in [[7,4], [7,3]]):
                     if all(x in ['-'] for x in [self.board[7][1], self.board[7][2], self.board[7][3]]):
-                        castlingMoves.append([[7,4],[7,2]])
+                        if self.board[7][4] == 'K' and self.board[7][2] == 'R':
+                            castlingMoves.append([[7,4],[7,2]])
 
         if self.whiteToMove == False:
             if all(x not in fromSquares + toSquares for x in [[0,4], [0,7]]):
                 if all(x not in currentAttackedSquares for x in [[0,4], [0,5]]):
                     if all(x in ['-'] for x in [self.board[0][5], self.board[0][6]]):
-                        castlingMoves.append([[0,4],[0,6]])
+                        if self.board[0][4] == 'k' and self.board[0][6] == 'r':
+                            castlingMoves.append([[0,4],[0,6]])
 
             if all(x not in fromSquares + toSquares for x in [[0,4], [0,0]]):
                 if all(x not in currentAttackedSquares for x in [[0,4], [0,3]]):
                     if all(x in ['-'] for x in [self.board[0][1], self.board[0][2], self.board[0][3]]):
-                        castlingMoves.append([[0,4],[0,2]])
+                        if self.board[0][4] == 'k' and self.board[0][2] == 'r':
+                            castlingMoves.append([[0,4],[0,2]])
 
         return castlingMoves
             
@@ -180,26 +185,30 @@ class Board():
 
     def pawnMoves(self, capturablePieces, i, j):
         pawnMoves = []
-        
-        if self.board[i][j].isupper():
-            up, lastRank = -1, 0
-        else:
-            up, lastRank = 1, 7
+        noIndexError = False
 
-        if  i + up >= lastRank:
+        print(self.board[i][j].isupper())
+        if self.board[i][j].isupper() and i - 1 >= 0:
+            noIndexError = True
+            up, startRank = -1, 6
+        elif self.board[i][j].islower() and i + 1 <= 7:
+            noIndexError = True
+            up, startRank = 1, 1
+
+        if noIndexError:
             #Moving without capturing
             if self.board[i + up][j] == '-':
                 pawnMoves.append([[i, j], [i + up, j]])
-                if i == 6 and self.board[i + (2 * up)][j] == '-':
+                if i == startRank and self.board[i + (2 * up)][j] == '-':
                     pawnMoves.append([[i, j], [i + (2 * up), j]])
 
             #Capture eastside.
             if j in range(7) and self.board[i + up][j + 1] in capturablePieces:
-                pawnMoves.append([[i, j], [i - 1, j + 1]])
+                pawnMoves.append([[i, j], [i + up, j + 1]])
             
             #Capture westside.
             if j in range(1,8) and self.board[i + up][j - 1] in capturablePieces:
-                pawnMoves.append([[i, j], [i - 1, j - 1]])
+                pawnMoves.append([[i, j], [i + up, j - 1]])
 
         return pawnMoves
 
