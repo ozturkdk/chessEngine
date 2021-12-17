@@ -1,15 +1,5 @@
 from chess import *
 
-board = [ ['-', '-', '-', '-', '-', '-', '-', 'k'],
-          ['-', '-', 'p', 'P', '-', '-', '-', '-'],
-          ['-', '-', '-', '-', '-', '-', '-', '-'],
-          ['-', '-', '-', '-', '-', '-', '-', '-'],
-          ['-', 'p', '-', '-', '-', '-', '-', '-'],
-          ['-', '-', '-', '-', '-', '-', '-', '-'],
-          ['P', '-', '-', '-', '-', '-', '-', '-'],
-          ['-', '-', '-', '-', '-', '-', '-', 'K'] ]
-
-
 board = [ ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
           ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
           ['-', '-', '-', '-', '-', '-', '-', '-'],
@@ -21,33 +11,70 @@ board = [ ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
 
 whiteToMove = True
 newBoard = Board(board, whiteToMove)
-newBoard.makeMove('e2', 'e4')
+newBoard.makeMove('b1', 'c3')
 
-whiteToMove = False
-newBoard = Board(board, whiteToMove)
+newBoard.whiteToMove = False
 newBoard.makeMove('e7', 'e5')
 
-whiteToMove = True
-newBoard = Board(board, whiteToMove)
-newBoard.makeMove('f1', 'c4')
+newBoard.whiteToMove = True
+newBoard.makeMove('a2', 'a4')
 
-whiteToMove = False
-newBoard = Board(board, whiteToMove)
-newBoard.makeMove('g8', 'f6')
+newBoard.whiteToMove = False
+newBoard.makeMove('g7', 'g6')
 
-whiteToMove = True
-newBoard = Board(board, whiteToMove)
-newBoard.makeMove('d1', 'h5')
+newBoard.whiteToMove = True
+newBoard.makeMove('a4', 'a5')
 
-whiteToMove = False
-newBoard = Board(board, whiteToMove)
-newBoard.makeMove('a7', 'a6')
+newBoard.whiteToMove = False
+newBoard.makeMove('b7', 'b5')
 
-whiteToMove = True
-newBoard = Board(board, whiteToMove)
-newBoard.makeMove('h5', 'f7')
+newBoard.whiteToMove = True
+newBoard.makeMove('a5', 'b6')
 
-whiteToMove = False
-newBoard = Board(board, whiteToMove)
-newBoard.makeMove('e8', 'f7')
+newBoard.whiteToMove = False
+newBoard.makeMove('f8', 'g7')
 
+newBoard.whiteToMove = True
+newBoard.makeMove('b2', 'b3')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('g8', 'h6')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('c1', 'b2')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('e8', 'g8')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('d2', 'd4')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('a7', 'a5')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('d1', 'd2')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('a5', 'a4')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('e1', 'c1')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('a4', 'b3')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('c1', 'b1')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('b8', 'a6')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('b1', 'a1')
+
+newBoard.whiteToMove = False
+newBoard.makeMove('a6', 'b4')
+
+newBoard.whiteToMove = True
+newBoard.makeMove('e1', 'c1')

@@ -38,6 +38,8 @@ class Board():
             lastElement = [self.splitMoves(self.history[-1])[0], self.splitMoves(self.history[-1])[1]]
         except:
             IndexError
+
+        # Returns [[RankFrom, RankTo], [FileFrom, FileTo]]
         return lastElement
 
     def pieceMoves(self):
@@ -108,26 +110,26 @@ class Board():
                 if all(x not in currentAttackedSquares for x in [[7,4], [7,5]]):
                     if all(x in ['-'] for x in [self.board[7][5], self.board[7][6]]):
                         if self.board[7][4] == 'K' and self.board[7][7] == 'R':
-                            castlingMoves.append([[7,4],[7,6]])
+                            castlingMoves.append([[7,4], [7,6]])
 
             if all(x not in fromSquares + toSquares for x in [[7,4], [7,0]]):
                 if all(x not in currentAttackedSquares for x in [[7,4], [7,3]]):
                     if all(x in ['-'] for x in [self.board[7][1], self.board[7][2], self.board[7][3]]):
-                        if self.board[7][4] == 'K' and self.board[7][2] == 'R':
-                            castlingMoves.append([[7,4],[7,2]])
+                        if self.board[7][4] == 'K' and self.board[7][0] == 'R':
+                            castlingMoves.append([[7,4], [7,2]])
 
         if self.whiteToMove == False:
             if all(x not in fromSquares + toSquares for x in [[0,4], [0,7]]):
                 if all(x not in currentAttackedSquares for x in [[0,4], [0,5]]):
                     if all(x in ['-'] for x in [self.board[0][5], self.board[0][6]]):
-                        if self.board[0][4] == 'k' and self.board[0][6] == 'r':
-                            castlingMoves.append([[0,4],[0,6]])
-
+                        if self.board[0][4] == 'k' and self.board[0][7] == 'r':
+                            castlingMoves.append([[0,4], [0,6]])
+                            
             if all(x not in fromSquares + toSquares for x in [[0,4], [0,0]]):
                 if all(x not in currentAttackedSquares for x in [[0,4], [0,3]]):
                     if all(x in ['-'] for x in [self.board[0][1], self.board[0][2], self.board[0][3]]):
-                        if self.board[0][4] == 'k' and self.board[0][2] == 'r':
-                            castlingMoves.append([[0,4],[0,2]])
+                        if self.board[0][4] == 'k' and self.board[0][0] == 'r':
+                            castlingMoves.append([[0,4], [0,2]])
 
         return castlingMoves
             
@@ -193,20 +195,19 @@ class Board():
     def pawnMoves(self, capturablePieces, i, j):
         pawnMoves = []
         noIndexError = False
-        opponentPawn = False
 
         rightCaptureSq, leftCaptureSq = j + 1, j - 1 
+        leftEdge, rightEdge = 0, 7
 
         if self.board[i][j].isupper():
             noIndexError = True
             up, startRank = -1, 6
-            enPassantFrom, enPassantTo = 1, 3
+            enPassantRankFrom, enPassantRankTo = 1, 3
             opponentPawn = 'p'
-
         elif self.board[i][j].islower():
             noIndexError = True
             up, startRank = 1, 1
-            enPassantFrom, enPassantTo = 6, 4
+            enPassantRankFrom, enPassantRankTo = 6, 4
             opponentPawn = 'P'
 
         if noIndexError:
@@ -224,12 +225,13 @@ class Board():
             if j in range(1,8) and self.board[i + up][j - 1] in capturablePieces:
                 pawnMoves.append([[i, j], [i + up, j - 1]])
         
-    
+        #En passant
+        lastElement = self.lastElement()
         if len(self.lastElement()) > 0:
-            if self.board[self.lastElement()[0][1]][self.lastElement()[1][1]] == opponentPawn and self.lastElement()[0][0] == enPassantFrom and self.lastElement()[0][1] == enPassantTo and self.lastElement()[1][0] == self.lastElement()[1][1]:
-                if i == self.lastElement()[0][1] and rightCaptureSq == self.lastElement()[1][1] and j + 1 <= 7:
+            if self.board[lastElement[0][1]][lastElement[1][1]] == opponentPawn and lastElement[0][0] == enPassantRankFrom and lastElement[0][1] == enPassantRankTo:
+                if i == lastElement[0][1] and rightCaptureSq == lastElement[1][1] and leftCaptureSq <= leftEdge:
                     pawnMoves.append([[i, j], [i + up, j + 1]])
-                if i == self.lastElement()[0][1] and leftCaptureSq == self.lastElement()[1][1] and j - 1 >= 0:
+                if i == lastElement[0][1] and leftCaptureSq == lastElement[1][1] and rightCaptureSq >= rightEdge:
                     pawnMoves.append([[i, j], [i + up, j - 1]])
         return pawnMoves
 
@@ -262,9 +264,11 @@ class Board():
         #Black Captures En Passant (remove pawn)
         if self.board[fromSq[0]][fromSq[1]] == 'p' and self.board[toSq[0]][toSq[1]] == '-' and [abs(x1 - x2) for (x1, x2) in zip(fromSq, toSq)] == [1,1]:
             self.board[toSq[0] - 1][toSq[1]] = '-'
-
+        
         movedPiece = self.board[fromSq[0]][fromSq[1]]
         self.board[fromSq[0]][fromSq[1]] = '-'
+
+        #Auto queen promotion else normal move.
         if movedPiece == 'P' and toSq[0] == 0:
             self.board[toSq[0]][toSq[1]] = 'Q'
         elif movedPiece == 'p' and toSq[0] == 7:
