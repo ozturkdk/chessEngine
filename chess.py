@@ -8,7 +8,6 @@ class Board():
         allLegalMoves = self.legalMoves()
         newMove = [self.chessToArray(moveFrom), self.chessToArray(moveTo)]
         if newMove in allLegalMoves:
-            print(allLegalMoves)
             self.history.append(newMove)
             self.updateBoard(self.chessToArray(moveFrom), self.chessToArray(moveTo))
             #Print statement
@@ -194,19 +193,20 @@ class Board():
     def pawnMoves(self, capturablePieces, i, j):
         pawnMoves = []
         noIndexError = False
+        opponentPawn = False
 
-        if self.board[i][j].isupper() and i - 1 >= 0:
+        rightCaptureSq, leftCaptureSq = j + 1, j - 1 
+
+        if self.board[i][j].isupper():
             noIndexError = True
             up, startRank = -1, 6
             enPassantFrom, enPassantTo = 1, 3
-            rightCaptureSq, leftCaptureSq = j + 1, j - 1 
             opponentPawn = 'p'
 
-        elif self.board[i][j].islower() and i + 1 <= 7:
+        elif self.board[i][j].islower():
             noIndexError = True
             up, startRank = 1, 1
             enPassantFrom, enPassantTo = 6, 4
-            rightCaptureSq, leftCaptureSq = j + 1, j - 1 
             opponentPawn = 'P'
 
         if noIndexError:
@@ -226,7 +226,6 @@ class Board():
         
     
         if len(self.lastElement()) > 0:
-            print(self.lastElement())
             if self.board[self.lastElement()[0][1]][self.lastElement()[1][1]] == opponentPawn and self.lastElement()[0][0] == enPassantFrom and self.lastElement()[0][1] == enPassantTo and self.lastElement()[1][0] == self.lastElement()[1][1]:
                 if i == self.lastElement()[0][1] and rightCaptureSq == self.lastElement()[1][1] and j + 1 <= 7:
                     pawnMoves.append([[i, j], [i + up, j + 1]])
@@ -263,11 +262,16 @@ class Board():
         #Black Captures En Passant (remove pawn)
         if self.board[fromSq[0]][fromSq[1]] == 'p' and self.board[toSq[0]][toSq[1]] == '-' and [abs(x1 - x2) for (x1, x2) in zip(fromSq, toSq)] == [1,1]:
             self.board[toSq[0] - 1][toSq[1]] = '-'
-        
+
         movedPiece = self.board[fromSq[0]][fromSq[1]]
         self.board[fromSq[0]][fromSq[1]] = '-'
-        self.board[toSq[0]][toSq[1]] = movedPiece 
-
+        if movedPiece == 'P' and toSq[0] == 0:
+            self.board[toSq[0]][toSq[1]] = 'Q'
+        elif movedPiece == 'p' and toSq[0] == 7:
+            self.board[toSq[0]][toSq[1]] = 'q'
+        else:
+            self.board[toSq[0]][toSq[1]] = movedPiece
+        
     def chessToArray(self, chessSq): 
 
         fileToArray = {
